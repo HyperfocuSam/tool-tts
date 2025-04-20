@@ -38,7 +38,8 @@ client = OpenAI(
 app = FastAPI()
 
 # --- Setup Templates ---
-templates = Jinja2Templates(directory="stt_webapp/templates")
+# The directory should be relative to main.py's location inside the container (/app)
+templates = Jinja2Templates(directory="templates")
 
 # --- Ensure Temp Folder Exists ---
 os.makedirs(TEMP_FOLDER, exist_ok=True)
