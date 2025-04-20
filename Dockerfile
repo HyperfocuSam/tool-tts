@@ -37,4 +37,5 @@ EXPOSE 8000
 # --bind 0.0.0.0:8000: Listen on all network interfaces on port 8000 inside the container
 # Platforms like Render will automatically use the $PORT environment variable if available, overriding the :8000 here.
 # Check your specific platform's documentation for how they handle port binding.
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8000"]
+# Added --timeout 300 to allow 5 minutes for worker processes to handle requests (e.g., transcription)
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8000", "--timeout", "300"]
