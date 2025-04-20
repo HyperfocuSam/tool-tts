@@ -133,6 +133,22 @@
             background-color: #e9ecef;
             border-radius: 6px;
         }
+        #copy-button {
+            display: none; /* Hidden by default */
+            margin-top: 1em;
+            padding: 0.6em 1.2em;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+            float: right; /* Position to the right */
+        }
+        #copy-button:hover {
+            background-color: var(--dark-gray);
+        }
         /* Spinner animation */
         .spinner {
             display: inline-block;
@@ -163,6 +179,7 @@
              <span class="spinner"></span>處理中... 請稍候。大型檔案可能需要一些時間。 <!-- Updated Loading Text + Spinner -->
         </div>
         <div id="result-container">
+             <button id="copy-button">複製文字</button> <!-- Add Copy Button -->
             <h2>轉錄結果：</h2> <!-- Updated Result Header -->
             <pre id="transcription-output"></pre>
         </div>
@@ -175,6 +192,7 @@
         const resultContainer = document.getElementById('result-container');
         const transcriptionOutput = document.getElementById('transcription-output');
         const fileInput = document.getElementById('audio_file');
+        const copyButton = document.getElementById('copy-button'); // Get copy button
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault(); // Prevent default form submission
@@ -188,6 +206,8 @@
             submitButton.disabled = true;
             loadingIndicator.style.display = 'block';
             resultContainer.style.display = 'none'; // Hide previous results
+            copyButton.style.display = 'none'; // Hide copy button
+            copyButton.textContent = '複製文字'; // Reset button text
             transcriptionOutput.textContent = ''; // Clear previous output
 
             const formData = new FormData();
@@ -204,21 +224,44 @@
                 if (response.ok) {
                     transcriptionOutput.textContent = resultText;
                     resultContainer.style.display = 'block'; // Show results
+                    copyButton.style.display = 'inline-block'; // Show copy button on success
                 } else {
                     // Display error message from the server
-                    transcriptionOutput.textContent = `Error: ${response.status} ${response.statusText}\n\n${resultText}`;
+                    transcriptionOutput.textContent = `錯誤: ${response.status} ${response.statusText}\n\n${resultText}`; // Translate Error prefix
                     resultContainer.style.display = 'block'; // Show error message
+                    copyButton.style.display = 'none'; // Keep copy button hidden on error
                 }
             } catch (error) {
-                console.error('Error during transcription request:', error);
-                transcriptionOutput.textContent = `An error occurred while contacting the server: ${error.message}`;
+                console.error('轉錄請求錯誤:', error); // Translate console error
+                transcriptionOutput.textContent = `連線伺服器時發生錯誤: ${error.message}`; // Translate error message
                 resultContainer.style.display = 'block'; // Show network/fetch error
+                copyButton.style.display = 'none'; // Keep copy button hidden on error
             } finally {
                 // Re-enable button and hide loading indicator
                 submitButton.disabled = false;
                 loadingIndicator.style.display = 'none';
                 // Optionally clear the file input
                 // fileInput.value = '';
+            }
+        });
+
+        // Add event listener for the copy button
+        copyButton.addEventListener('click', () => {
+            const textToCopy = transcriptionOutput.textContent;
+            if (navigator.clipboard && textToCopy) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    // Success feedback
+                    const originalText = copyButton.textContent;
+                    copyButton.textContent = '已複製!';
+                    setTimeout(() => {
+                        copyButton.textContent = originalText;
+                    }, 2000); // Revert text after 2 seconds
+                }).catch(err => {
+                    console.error('無法複製文字:', err); // Translate console error
+                    alert('複製文字失敗。請手動選取並複製。'); // Translate alert
+                });
+            } else {
+                alert('瀏覽器不支援自動複製或沒有內容可複製。'); // Translate alert
             }
         });
     </script>
