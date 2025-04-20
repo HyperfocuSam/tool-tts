@@ -129,20 +129,17 @@ def transcribe_chunk(chunk_path):
                                 "type": "text",
                                 "text": """<role>You are a professional transcriber.</role><task>Transcribe this audio recording completely and accurately. Include all spoken content, maintain proper punctuation, and identify different speakers if possible (e.g., Speaker 1:, Speaker 2:). If there are any unclear sections, indicate them with [unclear]. Preserve any technical terms, names, or specialized vocabulary as accurately as possible.</task><output_format>Provide the transcription directly as plain text. Start from the very beginning of the audio and include everything until the end.</output_format>""",
                             },
-                            {
-                                "type": "audio_file",
-                                "file_uri": chunk_path # Assuming gemini-1.5-flash supports local file URIs or needs upload first. Check API docs.
-                                                      # If direct file URI isn't supported, we need to upload the file first using client.files.create
-                                                      # and then reference the file ID. Let's assume file_uri works for now.
-                                                      # Alternative if file_uri fails: Upload chunk and use file ID.
-                            }
-                            # { # Original base64 method - might hit size limits or be less efficient
-                            #     "type": "input_audio",
-                            #     "input_audio": {
-                            #         "data": base64_audio,
-                            #         "format": file_format
-                            #     }
+                            # { # Using file_uri is not supported by the chat completions endpoint via the OpenAI compatibility layer
+                            #     "type": "audio_file",
+                            #     "file_uri": chunk_path
                             # }
+                            { # Use the base64 encoded audio data instead
+                                "type": "input_audio",
+                                "input_audio": {
+                                    "data": base64_audio,
+                                    "format": file_format # file_format is determined earlier (likely 'mp3')
+                                }
+                            }
                         ],
                     }
                 ],
